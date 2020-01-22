@@ -1,0 +1,34 @@
+---
+# vars file for roles/gitlab
+
+gitlab_fqdn: "https://gitlab2.targettrust.test/"
+
+gitlab_time_zone: 'America/Sao_Paulo'
+
+gitlab_nginx_client_max_body_size: '250m'
+
+gitlab_nginx_redirect_http_to_https: 'True'
+
+gitlab_signup_enabled: 'true'
+
+dnsname: gitlab2.targettrust.test
+
+certificate_path: "/etc/gitlab/ssl/"
+
+crtpath: "{{ certificate_path }}{{ dnsname }}.crt"
+
+keypath: "{{ certificate_path }}{{ dnsname }}.key"
+
+pempath: "{{ certificate_path }}{{ dnsname }}.pem"
+
+csrpath: "{{ certificate_path }}{{ dnsname }}.csr"
+
+pfxpath: "{{ certificate_path }}{{ dnsname }}.pfx"
+
+private_key_password: "gitlab"
+
+gitlab_nginx_ssl_certificate: "{{ crtpath }}"
+
+gitlab_nginx_ssl_certificate_key: "{{ keypath }}"
+
+...

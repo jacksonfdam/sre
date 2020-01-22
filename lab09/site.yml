@@ -1,0 +1,8 @@
+---
+- name: Providing Resources
+  hosts: all
+  remote_user: centos
+  become: yes
+  roles:
+    - roles/common  
+    - roles/server

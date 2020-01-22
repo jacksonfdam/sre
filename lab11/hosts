@@ -1,0 +1,4 @@
+[servers]
+192.168.122.30 ansible_ssh_user=centos
+192.168.122.31 ansible_ssh_user=centos
+192.168.122.32 ansible_ssh_user=centos

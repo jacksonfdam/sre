@@ -1,0 +1,89 @@
+---
+# tasks file for roles/gitlab
+- name: gitlab | Install dependencies
+  yum:
+    state: present
+    name:
+      - git
+      - curl
+      - policycoreutils-python 
+      - openssh-server
+      - openssh-clients
+      - firewalld
+   
+- name: gitlab | start sshd
+  service:
+    name: sshd
+    state: started
+      
+- name:  gitlab | Enable firewalld
+  service:
+    name: firewalld
+    state: started
+    enabled: yes
+    
+- name:  gitlab | Enable firewalld rules
+  firewalld:
+    service: "{{ item }}"
+    permanent: yes
+    immediate: yes
+    state: enabled
+  loop:
+  - http
+  - https
+  - ssh      
+
+- name: gitlab | Add the GitLab package repository and install the package
+  shell: curl -sS https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.rpm.sh | sudo bash
+  args:
+    warn: no    
+    
+- name: gitlab | Install gitlab
+  yum:
+    state: present
+    name:
+      - gitlab-ce
+
+- file:
+    path: "{{ tmppath }}"
+    state: absent
+- file:
+    path: "{{ tmppath }}"
+    state: directory
+    
+- name: "Generate the private key file to sign the CSR"
+  openssl_privatekey:
+    path: "{{ pempath }}"
+    passphrase: "{{ private_key_password }}"
+    cipher: aes256
+    
+- name: "Generate the CSR file signed with the private key"
+  openssl_csr:
+    path: "{{ csrpath }}"
+    privatekey_path: "{{ pempath }}"
+    privatekey_passphrase: "{{ private_key_password }}"
+    common_name: "{{ dnsname }}"
+    
+- name: "Sign the CSR file as a CA to turn it into a certificate"
+  openssl_certificate:
+    path: "{{ crtpath }}"
+    privatekey_path: "{{ pempath }}"
+    privatekey_passphrase: "{{ private_key_password }}"
+    csr_path: "{{ csrpath }}"
+    provider: selfsigned
+    
+- name: "Convert the signed certificate into a PKCS12 file with the attached private key"
+  openssl_pkcs12:
+    action: export
+    path: "{{ pfxpath }}"
+    name: "{{ dnsname }}"
+    privatekey_path: "{{ pempath }}"
+    privatekey_passphrase: "{{ private_key_password }}"
+    passphrase: password
+    certificate_path: "{{ crtpath }}"
+    state: present
+    
+- name: gitlab | Copy template
+  template: src=gitlab.rb.j2 dest=/etc/gitlab/gitlab.rb owner=centos group=centos mode=0600
+  notify: configure gitlab
+      

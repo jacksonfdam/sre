@@ -1,0 +1,11 @@
+external_url '{{ gitlab_fqdn }}'
+
+gitlab_rails['time_zone'] = '{{gitlab_time_zone}}'
+
+nginx['client_max_body_size'] = '{{gitlab_nginx_client_max_body_size}}'
+nginx['redirect_http_to_https'] = '{{gitlab_nginx_redirect_http_to_https}}'
+nginx['ssl_certificate'] = "{{gitlab_nginx_ssl_certificate}}"
+nginx['ssl_certificate_key'] = "{{gitlab_nginx_ssl_certificate_key}}"
+
+gitlab_rails['gitlab_signup_enabled'] = {{gitlab_signup_enabled}}
+
